@@ -1,4 +1,4 @@
-# Requerimientos de CLI
+# Requerimientos de Booking
 
 - Crear reservas
 - Asignación de asiento.
