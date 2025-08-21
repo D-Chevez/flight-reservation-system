@@ -1,35 +1,30 @@
 package org.kodigo.checkin.model;
 
 import org.kodigo.bookings.model.Booking;
-import java.time.LocalDateTime;
+import org.kodigo.passengers.model.Passenger;
+
 import java.util.UUID;
 
 public final class BoardingPass {
     private final UUID id;
-    private final String bookingCode;
-    private final String passengerName;
-    private final UUID flightId;
-    private final String seatNumber;
-    private final LocalDateTime issuedAt;
+    private final String code;
+    private final Booking booking;
 
-    public BoardingPass(Booking booking) {
+    public BoardingPass(String code, Booking booking) {
         this.id = UUID.randomUUID();
-        this.bookingCode = booking.code();
-        this.passengerName = booking.passenger().fullName();
-        this.flightId = booking.flight().id();
-        this.seatNumber = booking.seatNumber();
-        this.issuedAt = LocalDateTime.now();
+        this.code = code;
+        this.booking = booking;
     }
 
-    public UUID id() { return id; }
+    public UUID id() {
+        return id;
+    }
 
-    public String bookingCode() {return bookingCode; }
+    public Booking booking() {
+        return booking;
+    }
 
-    public String passengerName() { return passengerName; }
-
-    public UUID flightId() { return flightId; }
-
-    public String seatNumber() { return seatNumber; }
-
-    public LocalDateTime issuedAt() { return issuedAt; }
+    public String code() {
+        return code;
+    }
 }

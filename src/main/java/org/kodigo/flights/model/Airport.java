@@ -27,4 +27,9 @@ public final class Airport {
     public String city(){ return city; }
 
     public String country(){ return country; }
+
+    @Override
+    public String toString() {
+        return name + " " + city + " " + country;
+    }
 }
