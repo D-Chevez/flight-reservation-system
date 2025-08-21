@@ -1,28 +1,32 @@
 package org.kodigo.flights.service.flight;
 
 import org.kodigo.flights.model.Flight;
+import org.kodigo.flights.model.Seat;
 import org.kodigo.flights.model.SeatMap;
 import org.kodigo.flights.repository.flight.IFlightRepository;
-import org.kodigo.flights.repository.flight.InMemoryFlightRepository;
+import org.kodigo.flights.service.airport.IAirportService;
 import org.kodigo.flights.service.flight.validation.OriginAirportExistsValidator;
-import org.kodigo.flights.service.airport.InMemoryAirportService;
 import org.kodigo.flights.service.flight.validation.DestinationAirportExistsValidator;
 import org.kodigo.flights.service.flight.validation.FlightCreationContext;
 import org.kodigo.flights.service.flight.validation.FlightValidator;
 import org.kodigo.flights.service.flight.validation.OriginDestinationDifferentValidator;
+import org.kodigo.shared.codegen.ICodeGenerator;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class InMemoryFlightService implements IFlightService {
     private final IFlightRepository repo;
+    private final IAirportService airports;
+
     private final FlightValidator creationChain;
+    private final ICodeGenerator codeGen;
 
-    private final InMemoryAirportService airports;
 
-    public InMemoryFlightService(InMemoryFlightRepository repo, InMemoryAirportService airports){
+    public InMemoryFlightService(IFlightRepository repo, IAirportService airports, ICodeGenerator codeGen) {
         this.repo = repo;
 
         this.airports = airports;
@@ -32,15 +36,24 @@ public final class InMemoryFlightService implements IFlightService {
         var v3 = new OriginDestinationDifferentValidator();
         v1.linkWith(v2).linkWith(v3);
         this.creationChain = v1;
+        this.codeGen =  Objects.requireNonNull(codeGen);
     }
 
     @Override
-    public Flight create(String code, String originCode, String destinationCode, LocalDate date, Object baseFare, SeatMap seatMap) {
-        var ctx = new FlightCreationContext(code.toUpperCase(), originCode.toUpperCase(), destinationCode.toUpperCase(), date);
+    public Flight create(String originAirportCode, String destinationAirportCode, LocalDate date, Object baseFare) {
+        String code = codeGen.nextCode();
+
+        var ctx = new FlightCreationContext(code.toUpperCase(), originAirportCode.toUpperCase(), destinationAirportCode.toUpperCase(), date);
         creationChain.validate(ctx);
 
-        var origin = airports.getByCode(originCode).orElseThrow();
-        var dest   = airports.getByCode(destinationCode).orElseThrow();
+        var origin = airports.getByCode(originAirportCode).orElseThrow();
+        var dest   = airports.getByCode(destinationAirportCode).orElseThrow();
+
+        Collection<Seat> seats = List.of();
+        for (int i = 0; i < 10; i++) {
+            seats.add(new Seat("Seat" + (i + 1), Seat.SeatClass.ECONOMY));
+        }
+        SeatMap seatMap = new SeatMap(seats);
 
         var flight = new Flight(code.toUpperCase(), origin, dest, date, seatMap, null);
         repo.save(flight);
@@ -81,5 +94,10 @@ public final class InMemoryFlightService implements IFlightService {
     @Override
     public void seed(Collection<Flight> flights) {
         repo.saveAll(flights);
+    }
+
+    @Override
+    public List<Flight> getAll() {
+        return repo.list();
     }
 }

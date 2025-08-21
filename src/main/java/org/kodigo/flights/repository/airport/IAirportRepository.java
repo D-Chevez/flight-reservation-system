@@ -10,9 +10,7 @@ public interface IAirportRepository {
 
     List<Airport> findAll();
 
-    void save(Airport airport);
-
-    void update(Airport airport);
+    Airport save(Airport airport);
 
     void delete(String code);
 

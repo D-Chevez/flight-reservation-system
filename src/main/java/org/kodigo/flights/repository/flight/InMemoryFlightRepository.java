@@ -25,6 +25,11 @@ public final class InMemoryFlightRepository implements IFlightRepository {
     }
 
     @Override
+    public List<Flight> list() {
+        return data.values().stream().toList();
+    }
+
+    @Override
     public List<Flight> list(String origin, String destination, LocalDate date) {
         return data.values()
                 .stream()

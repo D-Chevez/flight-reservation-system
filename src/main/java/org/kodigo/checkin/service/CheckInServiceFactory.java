@@ -5,6 +5,7 @@ import org.kodigo.bookings.service.booking.IBookingService;
 import org.kodigo.checkin.repository.IBoardingPassRepository;
 import org.kodigo.checkin.repository.InMemoryBoardingPassRepository;
 import org.kodigo.checkin.service.validation.*;
+import org.kodigo.shared.codegen.CodeGenerator;
 import org.kodigo.shared.codegen.ICodeGenerator;
 
 import java.time.Clock;
@@ -12,7 +13,7 @@ import java.time.Duration;
 
 public final class CheckInServiceFactory {
 
-    public static ICheckInService build(IBookingService bookings, ICodeGenerator codegen) {
+    public static ICheckInService build(IBookingService bookings) {
         IBoardingPassRepository repo = new InMemoryBoardingPassRepository();
 
         var v1 = new BookingConfirmedValidator(bookings);
@@ -23,7 +24,10 @@ public final class CheckInServiceFactory {
 
         v1.linkWith(v2).linkWith(v3).linkWith(v4).linkWith(v5);
 
-        return new InMemoryCheckInService(repo, bookings, codegen, v1);
+        var exists = (java.util.function.Predicate<String>) code -> repo.findByCode(code).isPresent();
+        ICodeGenerator codeGen = new CodeGenerator(5, "CKIN", "-", exists, 9999);
+
+        return new InMemoryCheckInService(repo, bookings, codeGen, v1);
     }
 }
 

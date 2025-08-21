@@ -6,7 +6,7 @@ import org.kodigo.bookings.repository.IBookingRepository;
 import org.kodigo.shared.codegen.ICodeGenerator;
 import org.kodigo.bookings.service.booking.validation.BookingValidationContext;
 import org.kodigo.bookings.service.booking.validation.BookingValidator;
-import org.kodigo.bookings.service.passenger.PassengerService;
+import org.kodigo.passengers.service.PassengerService;
 import org.kodigo.bookings.service.pricing.IPricingService;
 import org.kodigo.bookings.service.seat.SeatAssignmentPolicy;
 import org.kodigo.flights.service.flight.IFlightService;

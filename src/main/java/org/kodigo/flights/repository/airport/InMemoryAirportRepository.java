@@ -22,13 +22,9 @@ public final class InMemoryAirportRepository implements IAirportRepository {
     }
 
     @Override
-    public void save(Airport airport) {
+    public Airport save(Airport airport) {
         data.put(airport.code(), airport);
-    }
-
-    @Override
-    public void update(Airport airport) {
-        data.put(airport.code(), airport);
+        return airport;
     }
 
     @Override

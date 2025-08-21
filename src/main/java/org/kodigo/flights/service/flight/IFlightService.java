@@ -9,9 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IFlightService {
-    Flight create(String code, String originCode, String destinationCode,
-                  LocalDate date, Object baseFare,
-                  SeatMap seatMap);
+    Flight create(String originAirportCode, String destinationAirportCode, LocalDate date, Object baseFare);
 
     List<Flight> search(String origin, String destination, LocalDate date);
 
@@ -22,4 +20,6 @@ public interface IFlightService {
     void updateSeatMap(String flightCode, SeatMap seatMap);
 
     void seed(Collection<Flight> flights);
+
+    List<Flight> getAll();
 }

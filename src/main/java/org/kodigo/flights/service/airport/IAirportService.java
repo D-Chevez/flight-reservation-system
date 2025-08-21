@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IAirportService {
-    Airport add(Airport airport);
+    Airport create(String name, String city, String country);
 
-    Airport update(Airport airport);
+    Airport update(String code, Airport airport);
 
     void delete(String code);
 

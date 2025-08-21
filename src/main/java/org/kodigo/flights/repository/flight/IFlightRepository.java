@@ -12,6 +12,8 @@ public interface IFlightRepository {
 
     Optional<Flight> findByCode(String code);
 
+    List<Flight> list();
+
     List<Flight> list(String origin, String destination, LocalDate date);
 
     void update(Flight flight);

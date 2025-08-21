@@ -4,9 +4,10 @@ import org.kodigo.bookings.repository.IBookingRepository;
 import org.kodigo.bookings.repository.InMemoryBookingRepository;
 import org.kodigo.shared.codegen.CodeGenerator;
 import org.kodigo.shared.codegen.ICodeGenerator;
+
 import org.kodigo.bookings.service.booking.validation.FlightSeatValidator;
 import org.kodigo.bookings.service.booking.validation.PassengerActiveValidator;
-import org.kodigo.bookings.service.passenger.PassengerService;
+import org.kodigo.passengers.service.PassengerService;
 import org.kodigo.bookings.service.pricing.DecoratorPricingService;
 import org.kodigo.bookings.service.pricing.IPricingService;
 import org.kodigo.bookings.service.seat.FirstFreeSeatPolicy;
@@ -29,7 +30,7 @@ public final class BookingServiceFactory {
         IPricingService pricing = new DecoratorPricingService(new BigDecimal("0.13")); // 13% VAT
 
         var exists = (java.util.function.Predicate<String>) code -> bookingRepo.findByCode(code).isPresent();
-        ICodeGenerator codeGen = new CodeGenerator(5, "FLT", "-", exists, 9999);
+        ICodeGenerator codeGen = new CodeGenerator(5, "FLT-BOOK", "-", exists, 9999);
 
         return new InMemoryBookingService(
                 bookingRepo, flights, passengers, v1, seatPolicy, pricing, codeGen
