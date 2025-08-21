@@ -1,4 +1,4 @@
-# Requerimientos de CLI
+# Requerimientos de Flights
 - Crear/seed de vuelos.
 - Buscar vuelos por origen, destino, fecha.
 - Consultar detalle de vuelo por code.
