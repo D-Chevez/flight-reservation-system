@@ -1,10 +1,10 @@
-package org.kodigo.bookings.service.booking.codegen;
+package org.kodigo.shared.codegen;
 
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-public final class CodeGenerator implements IBookingCodeGenerator {
+public final class CodeGenerator implements ICodeGenerator {
 
     private final int randomChars;
     private final String prefix;

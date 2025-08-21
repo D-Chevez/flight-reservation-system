@@ -3,7 +3,7 @@ package org.kodigo.bookings.service.booking;
 
 import org.kodigo.bookings.model.Booking;
 import org.kodigo.bookings.repository.IBookingRepository;
-import org.kodigo.bookings.service.booking.codegen.IBookingCodeGenerator;
+import org.kodigo.shared.codegen.ICodeGenerator;
 import org.kodigo.bookings.service.booking.validation.BookingValidationContext;
 import org.kodigo.bookings.service.booking.validation.BookingValidator;
 import org.kodigo.bookings.service.passenger.PassengerService;
@@ -22,7 +22,7 @@ public final class InMemoryBookingService implements IBookingService{
     private final BookingValidator validatorChain;
     private final SeatAssignmentPolicy seatPolicy;
     private final IPricingService pricing;
-    private final IBookingCodeGenerator codeGen;
+    private final ICodeGenerator codeGen;
 
     public InMemoryBookingService(IBookingRepository bookingRepo,
                                   IFlightService flights,
@@ -30,7 +30,7 @@ public final class InMemoryBookingService implements IBookingService{
                                   BookingValidator validatorChain,
                                   SeatAssignmentPolicy seatPolicy,
                                   IPricingService pricing,
-                                  IBookingCodeGenerator codeGen) {
+                                  ICodeGenerator codeGen) {
         this.bookingRepo = Objects.requireNonNull(bookingRepo);
         this.flights = Objects.requireNonNull(flights);
         this.passengers = Objects.requireNonNull(passengers);

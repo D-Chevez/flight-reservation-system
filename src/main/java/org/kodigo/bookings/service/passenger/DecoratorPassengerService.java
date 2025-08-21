@@ -9,7 +9,8 @@ public class DecoratorPassengerService implements PassengerService {
 
     public DecoratorPassengerService(PassengerService delegate) { this.delegate = delegate; }
 
-    @Override public Optional<Passenger> findByPassport(String passport) {
+    @Override
+    public Optional<Passenger> findByPassport(String passport) {
         // hook: logging/metrics
         return delegate.findByPassport(passport);
     }

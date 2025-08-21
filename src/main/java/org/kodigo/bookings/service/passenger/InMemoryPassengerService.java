@@ -11,7 +11,8 @@ public final class InMemoryPassengerService implements PassengerService {
         for (var p : passengers) byPassport.put(p.passport(), p);
     }
 
-    @Override public Optional<Passenger> findByPassport(String passport) {
+    @Override
+    public Optional<Passenger> findByPassport(String passport) {
         return Optional.ofNullable(byPassport.get(passport));
     }
 }
