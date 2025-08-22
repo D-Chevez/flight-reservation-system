@@ -10,8 +10,7 @@ public final class PassengerActiveValidator extends BaseValidator {
 
     @Override
     public void validate(BookingValidationContext ctx){
-        var p = passengers.findByPassport(ctx.passengerPassport())
-                .orElseThrow(() -> new IllegalStateException("Passenger not found"));
+        var p = passengers.findByPassport(ctx.passengerPassport());
         if (p.status() != Passenger.Status.ACTIVE) {
             throw new IllegalStateException("Passenger is not active");
         }

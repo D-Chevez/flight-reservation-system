@@ -19,4 +19,6 @@ public interface IFlightRepository {
     void update(Flight flight);
 
     void saveAll(Collection<Flight> flights);
+
+    void delete(Flight flight);
 }

@@ -5,7 +5,7 @@ import java.util.*;
 public final class SeatMap {
     private final Map<String, Boolean> occupancy = new HashMap<>(); // seatNumber -> occupied
 
-    public SeatMap(Collection<Seat> seats) {
+    public SeatMap(List<Seat> seats) {
         for (Seat s : seats) occupancy.put(s.number(), false);
     }
     public boolean isAvailable(String seatNumber){ return occupancy.containsKey(seatNumber) && !occupancy.get(seatNumber); }

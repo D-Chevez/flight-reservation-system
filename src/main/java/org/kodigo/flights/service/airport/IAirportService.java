@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IAirportService {
-    Airport create(String name, String city, String country);
+    Airport create(String code, String name, String city, String country);
 
-    Airport update(String code, Airport airport);
+    Airport update(String code, String name, String city, String country);
 
     void delete(String code);
 
-    Optional<Airport> getByCode(String code);
+    Airport getByCode(String code);
 
     List<Airport> list();
 }

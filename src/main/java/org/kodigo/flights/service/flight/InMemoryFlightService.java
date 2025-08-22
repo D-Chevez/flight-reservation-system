@@ -5,13 +5,11 @@ import org.kodigo.flights.model.Seat;
 import org.kodigo.flights.model.SeatMap;
 import org.kodigo.flights.repository.flight.IFlightRepository;
 import org.kodigo.flights.service.airport.IAirportService;
-import org.kodigo.flights.service.flight.validation.OriginAirportExistsValidator;
-import org.kodigo.flights.service.flight.validation.DestinationAirportExistsValidator;
-import org.kodigo.flights.service.flight.validation.FlightCreationContext;
-import org.kodigo.flights.service.flight.validation.FlightValidator;
-import org.kodigo.flights.service.flight.validation.OriginDestinationDifferentValidator;
+import org.kodigo.flights.service.flight.validation.*;
 import org.kodigo.shared.codegen.ICodeGenerator;
+import org.kodigo.shared.money.Money;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -27,35 +25,37 @@ public final class InMemoryFlightService implements IFlightService {
 
 
     public InMemoryFlightService(IFlightRepository repo, IAirportService airports, ICodeGenerator codeGen) {
-        this.repo = repo;
-
-        this.airports = airports;
-
-        var v1 = new OriginAirportExistsValidator(airports);
-        var v2 = new DestinationAirportExistsValidator(airports);
-        var v3 = new OriginDestinationDifferentValidator();
-        v1.linkWith(v2).linkWith(v3);
-        this.creationChain = v1;
+        this.repo = Objects.requireNonNull(repo);
+        this.airports = Objects.requireNonNull(airports);
         this.codeGen =  Objects.requireNonNull(codeGen);
+
+        var onCreate = new OriginDestinationDifferentValidator();
+        var onCreate2 = new DateFlightValidator();
+        var onCreate3 = new FlightCodeUniquenessValidator(repo);
+        onCreate.linkWith(onCreate2);
+        this.creationChain = onCreate;
     }
 
     @Override
-    public Flight create(String originAirportCode, String destinationAirportCode, LocalDate date, Object baseFare) {
-        String code = codeGen.nextCode();
+    public Flight create(String code, String originAirportCode, String destinationAirportCode, List<String> seats, LocalDate date, BigDecimal baseFare) {
+        //String code = codeGen.nextCode();
 
-        var ctx = new FlightCreationContext(code.toUpperCase(), originAirportCode.toUpperCase(), destinationAirportCode.toUpperCase(), date);
+        // Valida las condiciones de creacion
+        var ctx = new FlightCreationContext(code, originAirportCode, destinationAirportCode, date);
         creationChain.validate(ctx);
 
-        var origin = airports.getByCode(originAirportCode).orElseThrow();
-        var dest   = airports.getByCode(destinationAirportCode).orElseThrow();
+        var origin = airports.getByCode(originAirportCode);
+        var dest   = airports.getByCode(destinationAirportCode);
 
-        Collection<Seat> seats = List.of();
-        for (int i = 0; i < 10; i++) {
-            seats.add(new Seat("Seat" + (i + 1), Seat.SeatClass.ECONOMY));
-        }
-        SeatMap seatMap = new SeatMap(seats);
+        List<Seat> seatList = seats.stream()
+                .map(num -> new Seat(num, Seat.SeatClass.ECONOMY))
+                .toList();
 
-        var flight = new Flight(code.toUpperCase(), origin, dest, date, seatMap, null);
+        SeatMap seatMap = new SeatMap(seatList);
+
+        Money baseFareMoney = Money.of(baseFare, "USD");
+
+        var flight = new Flight(code, origin, dest, date, seatMap, baseFareMoney);
         repo.save(flight);
         return flight;
     }
@@ -66,8 +66,19 @@ public final class InMemoryFlightService implements IFlightService {
     }
 
     @Override
-    public Optional<Flight> getByCode(String code) {
-        return repo.findByCode(code);
+    public Flight getByCode(String code) {
+        var optFlight = repo.findByCode(code);
+
+        if (optFlight.isEmpty()) throw new IllegalArgumentException("Flight '" + code + "' not found");
+
+        return optFlight.get();
+    }
+
+    @Override
+    public List<Flight> getByAirportCode(String airportCode) {
+        return repo.list().stream()
+                .filter(b -> b.origin().code().equals(airportCode))
+                .toList();
     }
 
     @Override
@@ -99,5 +110,28 @@ public final class InMemoryFlightService implements IFlightService {
     @Override
     public List<Flight> getAll() {
         return repo.list();
+    }
+
+    @Override
+    public void delete(String flightCode) {
+        var flight = repo.findByCode(flightCode).orElseThrow();
+        repo.delete(flight);
+    }
+
+    //TODO Implementa validator
+    @Override
+    public void update(String flightCode, String newOriginAirportCode, String newDestinationAirportCode) {
+        var flight = repo.findByCode(flightCode).orElseThrow();
+        var newOrigin = airports.getByCode(newOriginAirportCode);
+        var newDestination = airports.getByCode(newDestinationAirportCode);
+        var updatedFlight = new Flight(
+                flight.code(),
+                newOrigin,
+                newDestination,
+                flight.date(),
+                flight.seatMap(),
+                flight.baseFare()
+        );
+        repo.update(updatedFlight);
     }
 }

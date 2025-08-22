@@ -9,11 +9,7 @@ public final class BookingConfirmedValidator extends BaseCheckInValidator {
 
     @Override
     public void validate(CheckInValidationContext ctx){
-        var b = bookings.getByCode(ctx.bookingCode());
-        if (b.isEmpty()) {
-            throw new IllegalArgumentException("Booking not found: " + ctx.bookingCode());
-        }
-        var booking = b.get();
+        var booking = bookings.getByCode(ctx.bookingCode());
         if (booking.state() != Booking.BookingState.CONFIRMED) {
             throw new IllegalStateException("Booking is not CONFIRMED: " + ctx.bookingCode());
         }

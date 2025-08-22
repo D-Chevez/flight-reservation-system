@@ -27,4 +27,9 @@ public final class BoardingPass {
     public String code() {
         return code;
     }
+
+    @Override
+    public String toString(){
+        return booking.code() + code();
+    }
 }

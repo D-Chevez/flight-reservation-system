@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 public final class Passenger {
-    public enum SeatClass { ECONOMY, PREMIUM_ECONOMY, BUSINESS }
     public enum Status { ACTIVE, SUSPENDED }
 
     private final UUID id;
@@ -62,5 +61,10 @@ public final class Passenger {
     public void reactivate()
     {
         this.status = Status.ACTIVE;
+    }
+
+    @Override
+    public String toString() {
+        return fullName + " (" + passport + ") - ";
     }
 }

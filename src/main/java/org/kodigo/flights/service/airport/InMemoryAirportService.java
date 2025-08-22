@@ -14,32 +14,32 @@ import java.util.Optional;
 
 public final class InMemoryAirportService implements IAirportService {
     private final IAirportRepository repo;
-    private final AirportValidator onCreate;
-    private final AirportValidator onUpdate;
+    private final AirportValidator createValidator;
+    private final AirportValidator updateValidator;
     private final ICodeGenerator codeGenerator;
 
     public InMemoryAirportService(IAirportRepository repo,
-                                  AirportValidator CreateValidator,
-                                  AirportValidator UpdateValidator,
+                                  AirportValidator createValidator,
+                                  AirportValidator updateValidator,
                                   ICodeGenerator codeGenerator) {
         this.repo = Objects.requireNonNull(repo);
-        this.onCreate = Objects.requireNonNull(CreateValidator);
-        this.onUpdate = Objects.requireNonNull(UpdateValidator);
+        this.createValidator = Objects.requireNonNull(createValidator);
+        this.updateValidator = Objects.requireNonNull(updateValidator);
         this.codeGenerator = Objects.requireNonNull(codeGenerator);
     }
 
     @Override
-    public Airport create(String name, String city, String country) {
-        String code = codeGenerator.nextCode();
-
-        onCreate.validate(new AirportValidationContext(code, name));
+    public Airport create(String code, String name, String city, String country) {
+        //String code = codeGenerator.nextCode();
+        createValidator.validate(new AirportValidationContext(code, name, city, country));
         return repo.save(new Airport(code, name, city, country));
     }
 
     @Override
-    public Airport update(String code, Airport airport) {
-        onUpdate.validate(new AirportValidationContext(code, airport.name()));
-        return repo.save(airport);
+    public Airport update(String code, String name, String city, String country) {
+        updateValidator.validate(new AirportValidationContext(code, name, city, country));
+        Airport updated = new Airport(code, name, city, country);
+        return repo.save(updated);
     }
 
     @Override
@@ -49,8 +49,12 @@ public final class InMemoryAirportService implements IAirportService {
     }
 
     @Override
-    public Optional<Airport> getByCode(String code) {
-        return repo.findByCode(code);
+    public Airport getByCode(String code) {
+        var optAirport = repo.findByCode(code);
+
+        if(optAirport.isEmpty()) throw new IllegalStateException("Airport wiht code '" + code + "' not found.");
+
+        return optAirport.get();
     }
 
     @Override

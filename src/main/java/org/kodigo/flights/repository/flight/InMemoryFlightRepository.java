@@ -50,4 +50,7 @@ public final class InMemoryFlightRepository implements IFlightRepository {
     public void saveAll(Collection<Flight> flights) {
         for (var f : flights) data.put(f.code(), f);
     }
+
+    @Override
+    public void delete(Flight flight) { data.remove(flight.code()); };
 }

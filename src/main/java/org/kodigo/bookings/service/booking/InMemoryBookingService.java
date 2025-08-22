@@ -3,6 +3,7 @@ package org.kodigo.bookings.service.booking;
 
 import org.kodigo.bookings.model.Booking;
 import org.kodigo.bookings.repository.IBookingRepository;
+import org.kodigo.checkin.service.ICheckInService;
 import org.kodigo.shared.codegen.ICodeGenerator;
 import org.kodigo.bookings.service.booking.validation.BookingValidationContext;
 import org.kodigo.bookings.service.booking.validation.BookingValidator;
@@ -41,23 +42,18 @@ public final class InMemoryBookingService implements IBookingService{
     }
 
     @Override
-    public void create(String passengerPassport, String flightCode, String requestedSeat) {
-        // 1) validations
+    public void create(String code, String passengerPassport, String flightCode, String requestedSeat) {
         validatorChain.validate(new BookingValidationContext(passengerPassport, flightCode, requestedSeat));
 
-        // 2) load aggregates
-        var flight = flights.getByCode(flightCode).orElseThrow();
-        var passenger = passengers.findByPassport(passengerPassport).orElseThrow();
+        var flight = flights.getByCode(flightCode);
+        var passenger = passengers.findByPassport(passengerPassport);
 
-        // 3) seat assignment + occupy
         var seatNumber = seatPolicy.selectSeat(flight, requestedSeat);
         flight.seatMap().occupy(seatNumber);
 
-        // 4) price
         var total = pricing.calculateTotal(flight.baseFare());
 
-        // 5) build + persist
-        var code = codeGen.nextCode();
+        // var code = codeGen.nextCode();
         var booking = new Booking(code, flight, passenger, seatNumber, total);
         booking.confirm();
 
@@ -66,8 +62,12 @@ public final class InMemoryBookingService implements IBookingService{
     }
 
     @Override
-    public Optional<Booking> getByCode(String code) {
-        return bookingRepo.findByCode(code);
+    public Booking getByCode(String code) {
+        var opt = bookingRepo.findByCode(code);
+
+        if (opt.isEmpty()) throw new IllegalArgumentException("Booking '" +code+ "' not found.");
+
+        return opt.get();
     }
 
     @Override
@@ -76,19 +76,28 @@ public final class InMemoryBookingService implements IBookingService{
     }
 
     @Override
+    public List<Booking> list() {
+        return bookingRepo.list();
+    }
+
+    @Override
     public List<Booking> getByFlightCode(String flightCode) {
         return bookingRepo.list().stream().filter(b -> b.flight().code().equals(flightCode))
+                .toList();
+    }
+
+    @Override
+    public List<Booking> getByPassengerPassport(String passengerPassport) {
+        return bookingRepo.list().stream()
+                .filter(b -> b.passenger().passport().equals(passengerPassport))
                 .toList();
     }
 
 
     @Override
     public void cancel(String code) {
-        var objectBooking = getByCode(code);
+        var booking = getByCode(code);
 
-        if(objectBooking.isEmpty()) throw new IllegalArgumentException("Booking not found: " + code);
-
-        var booking = objectBooking.get();
         if (booking.state() == Booking.BookingState.CANCELLED) return;
 
         var flight = booking.flight();
@@ -101,11 +110,8 @@ public final class InMemoryBookingService implements IBookingService{
 
     @Override
     public void checkIn(String code) {
-        var objectBooking = getByCode(code);
+        var booking = getByCode(code);
 
-        if(objectBooking.isEmpty()) throw new IllegalArgumentException("Booking not found: " + code);
-
-        var booking = objectBooking.get();
         if (booking.state() == Booking.BookingState.CHECKED_IN) return;
 
         if (booking.state() == Booking.BookingState.CANCELLED) {
@@ -117,5 +123,30 @@ public final class InMemoryBookingService implements IBookingService{
         flights.updateSeatMap(booking.flight().code(), booking.flight().seatMap());
     }
 
+
+    @Override
+    public void changeSeat(String code, String newSeatNumber) {
+        var booking = getByCode(code);
+
+        if (booking.state() == Booking.BookingState.CANCELLED) {
+            throw new IllegalStateException("Cannot change seat of a cancelled booking: " + code);
+        }
+
+        var flight = booking.flight();
+        flight.seatMap().release(booking.seatNumber());
+
+        var seatNumber = seatPolicy.selectSeat(flight, newSeatNumber);
+        flight.seatMap().occupy(seatNumber);
+
+        Booking newBooking = new Booking(
+                booking.code(),
+                flight,
+                booking.passenger(),
+                seatNumber,
+                booking.total()
+        );
+        bookingRepo.save(newBooking);
+        flights.updateSeatMap(flight.code(), flight.seatMap());
+    }
 
 }
