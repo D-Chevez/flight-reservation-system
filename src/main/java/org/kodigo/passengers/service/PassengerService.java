@@ -46,14 +46,18 @@ public class PassengerService {
         repository.save(passenger);
     }
 
-    public Optional<Passenger> findByPassport(String passport) {
-        return repository.findByPassport(passport);
+    public Passenger findByPassport(String passport) {
+        var opt = repository.findByPassport(passport);
+
+        if(opt.isEmpty()) throw new IllegalArgumentException("Passenger '" +passport+ "' not found.");
+
+        return opt.get();
     }
 
 
     public void deletePassenger(String passport) {
-        Passenger passenger = repository.findByPassport(passport)
-                .orElseThrow(() -> new IllegalArgumentException("Pasajero no encontrado"));
+        Passenger passenger = findByPassport(passport);
+
         repository.delete(passenger.id());
     }
 

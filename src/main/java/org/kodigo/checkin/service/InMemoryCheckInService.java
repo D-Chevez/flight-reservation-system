@@ -32,7 +32,7 @@ public final class InMemoryCheckInService implements ICheckInService {
         var ctx = new CheckInValidationContext(bookingCode, passengerPassport, requestedSeat);
         validatorChain.validate(ctx);
 
-        Booking b = bookings.getByCode(bookingCode).orElseThrow();
+        Booking b = bookings.getByCode(bookingCode);
 
         String bpCode = codegen.nextCode();
         BoardingPass bp = new BoardingPass(
@@ -45,17 +45,11 @@ public final class InMemoryCheckInService implements ICheckInService {
     }
 
     @Override
-    public Optional<BoardingPass> getByBoardingPassCode(String bpCode) {
-        return repo.findByCode(bpCode);
-    }
+    public BoardingPass getByBookingCode(String bookingCode) {
+        var opt = repo.findByBookingCode(bookingCode);
 
-    @Override
-    public Optional<BoardingPass> getByBookingCode(String bookingCode) {
-        return repo.findByBookingCode(bookingCode);
-    }
+        if(opt.isEmpty()) throw new IllegalArgumentException("Booking '" +bookingCode+ "' has not boarding pass.");
 
-    @Override
-    public void undo(String bookingCode) {
-        repo.deleteByBookingCode(bookingCode);
+        return opt.get();
     }
 }

@@ -25,6 +25,11 @@ public final class InMemoryFlightRepository implements IFlightRepository {
     }
 
     @Override
+    public List<Flight> list() {
+        return data.values().stream().toList();
+    }
+
+    @Override
     public List<Flight> list(String origin, String destination, LocalDate date) {
         return data.values()
                 .stream()
@@ -45,4 +50,7 @@ public final class InMemoryFlightRepository implements IFlightRepository {
     public void saveAll(Collection<Flight> flights) {
         for (var f : flights) data.put(f.code(), f);
     }
+
+    @Override
+    public void delete(Flight flight) { data.remove(flight.code()); };
 }

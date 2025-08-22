@@ -19,11 +19,7 @@ public final class FlightCheckInWindowValidator extends BaseCheckInValidator {
 
     @Override
     public void validate(CheckInValidationContext ctx){
-        var b = bookings.getByCode(ctx.bookingCode());
-        if (b.isEmpty()) {
-            throw new IllegalArgumentException("Booking not found: " + ctx.bookingCode());
-        }
-        var booking = b.get();
+        var booking = bookings.getByCode(ctx.bookingCode());
         var flight = booking.flight();
         java.time.LocalDateTime dep = resolveDeparture(flight);
         var now = LocalDateTime.now(clock);

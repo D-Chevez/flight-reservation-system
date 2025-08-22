@@ -14,11 +14,7 @@ public final class SeatChangeAllowedValidator extends BaseCheckInValidator {
     @Override
     public void validate(CheckInValidationContext ctx){
         if (!allowSeatChange && ctx.requestedSeat() != null) {
-            var b = bookings.getByCode(ctx.bookingCode());
-            if (b.isEmpty()) {
-                throw new IllegalArgumentException("Booking not found: " + ctx.bookingCode());
-            }
-            var booking = b.get();
+            var booking = bookings.getByCode(ctx.bookingCode());
             var current = booking.seatNumber();
             if (!current.equals(ctx.requestedSeat())) {
                 throw new IllegalStateException("Seat changes are not allowed at check-in");

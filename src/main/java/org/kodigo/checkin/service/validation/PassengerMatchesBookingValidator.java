@@ -9,11 +9,7 @@ public final class PassengerMatchesBookingValidator extends BaseCheckInValidator
 
     @Override
     public void validate(CheckInValidationContext ctx){
-        var b = bookings.getByCode(ctx.bookingCode());
-        if (b.isEmpty()) {
-            throw new IllegalArgumentException("Booking not found: " + ctx.bookingCode());
-        }
-        var booking = b.get();
+        var booking = bookings.getByCode(ctx.bookingCode());
         var passport = booking.passenger().passport();
         if (!passport.equals(ctx.passengerPassport())) {
             throw new IllegalArgumentException("Passenger does not match booking");
