@@ -63,11 +63,8 @@ public final class InMemoryBookingService implements IBookingService{
 
     @Override
     public Booking getByCode(String code) {
-        var opt = bookingRepo.findByCode(code);
-
-        if (opt.isEmpty()) throw new IllegalArgumentException("Booking '" +code+ "' not found.");
-
-        return opt.get();
+        return bookingRepo.findByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("No booking found with code: " + code));
     }
 
     @Override
@@ -96,7 +93,8 @@ public final class InMemoryBookingService implements IBookingService{
 
     @Override
     public void cancel(String code) {
-        var booking = getByCode(code);
+        Booking booking = bookingRepo.findByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("No booking found with code: " + code));
 
         if (booking.state() == Booking.BookingState.CANCELLED) return;
 
@@ -110,7 +108,8 @@ public final class InMemoryBookingService implements IBookingService{
 
     @Override
     public void checkIn(String code) {
-        var booking = getByCode(code);
+        Booking booking = bookingRepo.findByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("No booking found with code: " + code));
 
         if (booking.state() == Booking.BookingState.CHECKED_IN) return;
 
@@ -126,7 +125,8 @@ public final class InMemoryBookingService implements IBookingService{
 
     @Override
     public void changeSeat(String code, String newSeatNumber) {
-        var booking = getByCode(code);
+        Booking booking = bookingRepo.findByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("No booking found with code: " + code));
 
         if (booking.state() == Booking.BookingState.CANCELLED) {
             throw new IllegalStateException("Cannot change seat of a cancelled booking: " + code);

@@ -26,7 +26,7 @@ public final class InMemoryFlightRepository implements IFlightRepository {
 
     @Override
     public List<Flight> list() {
-        return data.values().stream().toList();
+        return List.copyOf(data.values());
     }
 
     @Override

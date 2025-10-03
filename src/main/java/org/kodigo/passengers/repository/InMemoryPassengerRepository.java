@@ -26,7 +26,7 @@ public class InMemoryPassengerRepository implements passengerRepository{
 
     @Override
     public List<Passenger> findAll(){
-        return new ArrayList<>(storage.values());
+        return List.copyOf(storage.values());
     }
 
     @Override

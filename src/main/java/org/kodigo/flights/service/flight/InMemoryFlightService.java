@@ -67,11 +67,9 @@ public final class InMemoryFlightService implements IFlightService {
 
     @Override
     public Flight getByCode(String code) {
-        var optFlight = repo.findByCode(code);
 
-        if (optFlight.isEmpty()) throw new IllegalArgumentException("Flight '" + code + "' not found");
-
-        return optFlight.get();
+        return repo.findByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Flight not found: " + code));
     }
 
     @Override
@@ -90,8 +88,9 @@ public final class InMemoryFlightService implements IFlightService {
 
     @Override
     public void updateSeatMap(String flightCode, SeatMap seatMap) {
-        var flight = repo.findByCode(flightCode).orElseThrow();
-        var updatedFlight = new Flight(
+        Flight flight = repo.findByCode(flightCode)
+                .orElseThrow(() -> new IllegalArgumentException("Flight not found: " + flightCode));
+        Flight updatedFlight = new Flight(
                 flight.code(),
                 flight.origin(),
                 flight.destination(),
@@ -114,14 +113,16 @@ public final class InMemoryFlightService implements IFlightService {
 
     @Override
     public void delete(String flightCode) {
-        var flight = repo.findByCode(flightCode).orElseThrow();
+        Flight flight = repo.findByCode(flightCode)
+                .orElseThrow(() -> new IllegalArgumentException("Flight not found: " + flightCode));
         repo.delete(flight);
     }
 
-    //TODO Implementa validator
     @Override
     public void update(String flightCode, String newOriginAirportCode, String newDestinationAirportCode) {
-        var flight = repo.findByCode(flightCode).orElseThrow();
+        Flight flight = repo.findByCode(flightCode)
+                .orElseThrow(() -> new IllegalArgumentException("Flight not found: " + flightCode));
+
         var newOrigin = airports.getByCode(newOriginAirportCode);
         var newDestination = airports.getByCode(newDestinationAirportCode);
         var updatedFlight = new Flight(

@@ -18,7 +18,7 @@ public final class InMemoryAirportRepository implements IAirportRepository {
 
     @Override
     public List<Airport> findAll() {
-        return new ArrayList<>(data.values());
+        return List.copyOf(data.values());
     }
 
     @Override
