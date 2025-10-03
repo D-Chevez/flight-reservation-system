@@ -50,11 +50,9 @@ public final class InMemoryAirportService implements IAirportService {
 
     @Override
     public Airport getByCode(String code) {
-        var optAirport = repo.findByCode(code);
 
-        if(optAirport.isEmpty()) throw new IllegalStateException("Airport wiht code '" + code + "' not found.");
-
-        return optAirport.get();
+        return repo.findByCode(code)
+                .orElseThrow(() -> new NoSuchElementException("Airport with code '" + code + "' not found."));
     }
 
     @Override

@@ -46,10 +46,7 @@ public final class InMemoryCheckInService implements ICheckInService {
 
     @Override
     public BoardingPass getByBookingCode(String bookingCode) {
-        var opt = repo.findByBookingCode(bookingCode);
-
-        if(opt.isEmpty()) throw new IllegalArgumentException("Booking '" +bookingCode+ "' has not boarding pass.");
-
-        return opt.get();
+        return repo.findByBookingCode(bookingCode).orElseThrow(() ->
+                new IllegalArgumentException("No boarding pass found for booking '" + bookingCode + "'"));
     }
 }

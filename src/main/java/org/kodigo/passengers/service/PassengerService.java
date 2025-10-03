@@ -42,21 +42,20 @@ public class PassengerService {
     public void reactivatePassenger(String passport) {
         Passenger passenger = repository.findByPassport(passport)
                 .orElseThrow(() -> new IllegalArgumentException("Pasajero no encontrado"));
+
         passenger.reactivate();
         repository.save(passenger);
     }
 
     public Passenger findByPassport(String passport) {
-        var opt = repository.findByPassport(passport);
-
-        if(opt.isEmpty()) throw new IllegalArgumentException("Passenger '" +passport+ "' not found.");
-
-        return opt.get();
+        return repository.findByPassport(passport)
+                .orElseThrow(() -> new IllegalArgumentException("Passenger '" +passport+ "' not found."));
     }
 
 
     public void deletePassenger(String passport) {
-        Passenger passenger = findByPassport(passport);
+        Passenger passenger = repository.findByPassport(passport)
+                .orElseThrow(() -> new IllegalArgumentException("Pasajero no encontrado"));
 
         repository.delete(passenger.id());
     }

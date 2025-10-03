@@ -21,7 +21,7 @@ public final class InMemoryBookingRepository implements IBookingRepository {
 
     @Override
     public List<Booking> list() {
-        return new ArrayList<>(data.values());
+        return List.copyOf(data.values());
     }
 
     @Override
